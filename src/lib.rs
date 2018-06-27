@@ -55,18 +55,6 @@ mod tests {
     use super::*;
     use std::fs::{remove_file, File};
 
-    const CONFIG_CONTENT: &str = "
-awesome-project:
-  path: ~/Devel/Projects/awesome-project/
-
-yet_another_project:
-  path: ~/Devel/Projects/yet_another_project
-  instructions:
-    - source ~/Devel/Envs/yet_another_project/bin/activate
-    - export FLASK_APP=app.py
-    - export FLASK_DEBUG=1
-";
-
     #[test]
     fn find_returns_error_if_nothing_found() {
         let result = Config::find("nonexistence_config.yaml");
@@ -104,6 +92,18 @@ yet_another_project:
 
         config.load();
     }
+
+    const CONFIG_CONTENT: &str = "
+awesome-project:
+  path: ~/Devel/Projects/awesome-project/
+
+yet_another_project:
+  path: ~/Devel/Projects/yet_another_project
+  instructions:
+    - source ~/Devel/Envs/yet_another_project/bin/activate
+    - export FLASK_APP=app.py
+    - export FLASK_DEBUG=1
+";
 
     struct FakeConfig {
         path: String,
