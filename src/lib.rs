@@ -15,6 +15,8 @@ struct Project {
     instructions: Vec<String>,
 }
 
+type Projects = BTreeMap<String, Project>;
+
 pub struct Config {
     path: String,
     projects: Option<BTreeMap<String, Project>>,
@@ -40,13 +42,13 @@ impl Config {
         }
     }
 
-    fn load(&mut self) {
+    fn parse(&self) -> Projects {
         let mut file = File::open(&self.path).unwrap();
         let mut contents = String::new();
 
         file.read_to_string(&mut contents).unwrap();
 
-        self.projects = serde_yaml::from_str(&contents).unwrap();
+        serde_yaml::from_str(&contents).unwrap()
     }
 }
 
@@ -74,44 +76,33 @@ mod tests {
     }
 
     #[test]
-    fn loading_projects_fill_projects() {
-        let _fake_config = FakeConfig::new("conf2.yaml", CONFIG_CONTENT);
-        let mut config = Config::find("conf2.yaml").unwrap();
-
-        config.load();
-
-        assert!(config.projects.is_some());
-        assert_eq!(config.projects.unwrap().len(), 2);
-    }
-
-    #[test]
     #[should_panic]
-    fn loading_invalid_config_should_panic() {
+    fn invalid_config_parsing_should_panic() {
         let _fake_config = FakeConfig::new("conf3.yaml", "lolkek");
-        let mut config = Config::find("conf3.yaml").unwrap();
+        let config = Config::find("conf3.yaml").unwrap();
 
-        config.load();
+        config.parse();
     }
 
     #[test]
-    fn loaded_project_with_path_only() {
+    fn parsed_project_with_path_only() {
         let _fake_config = FakeConfig::new("conf4.yaml", CONFIG_CONTENT);
-        let mut config = Config::find("conf4.yaml").unwrap();
+        let config = Config::find("conf4.yaml").unwrap();
 
-        config.load();
-        let project = &config.projects.unwrap()["awesome-project"];
+        let projects = config.parse();
+        let project = &projects["awesome-project"];
 
         assert_eq!(project.path, "~/Devel/Projects/awesome-project/");
         assert_eq!(project.instructions.len(), 0);
     }
 
     #[test]
-    fn loaded_project_with_all_data() {
+    fn parsed_project_with_all_data() {
         let _fake_config = FakeConfig::new("conf5.yaml", CONFIG_CONTENT);
-        let mut config = Config::find("conf5.yaml").unwrap();
+        let config = Config::find("conf5.yaml").unwrap();
 
-        config.load();
-        let project = &config.projects.unwrap()["yet_another_project"];
+        let projects = config.parse();
+        let project = &projects["yet_another_project"];
 
         assert_eq!(project.path, "~/Devel/Projects/yet_another_project");
         assert_eq!(
