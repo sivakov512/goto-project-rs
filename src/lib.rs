@@ -31,19 +31,19 @@ impl Config {
         }
     }
 
-    pub fn find(name: &str) -> Result<Config, String> {
+    fn find_path(name: &str) -> Result<String, String> {
         let mut path: PathBuf = env::home_dir().ok_or("Home dir not found on your system")?;
         path.push(name);
 
         let path_str = path.to_str().unwrap();
         match path.exists() {
-            true => Ok(Config::new(path_str)),
+            true => Ok(path_str.to_owned()),
             false => Err(format!("\"{}\" config not found", path_str)),
         }
     }
 
-    fn parse(&self) -> Projects {
-        let mut file = File::open(&self.path).unwrap();
+    fn parse(path: &str) -> Projects {
+        let mut file = File::open(path).unwrap();
         let mut contents = String::new();
 
         file.read_to_string(&mut contents).unwrap();
@@ -59,7 +59,7 @@ mod tests {
 
     #[test]
     fn find_returns_error_if_nothing_found() {
-        let result = Config::find("nonexistence_config.yaml");
+        let result = Config::find_path("nonexistence_config.yaml");
 
         let err = result.err().unwrap();
         assert!(err.contains("nonexistence_config.yaml\" config not found"));
@@ -69,27 +69,24 @@ mod tests {
     fn find_returns_correct_config_if_found() {
         let _fake_config = FakeConfig::new("conf1.yaml", CONFIG_CONTENT);
 
-        let result = Config::find("conf1.yaml");
+        let result = Config::find_path("conf1.yaml");
 
-        let config = result.unwrap();
-        assert!(config.path.contains("conf1.yaml"));
+        assert!(result.unwrap().contains("conf1.yaml"));
     }
 
     #[test]
     #[should_panic]
     fn invalid_config_parsing_should_panic() {
-        let _fake_config = FakeConfig::new("conf3.yaml", "lolkek");
-        let config = Config::find("conf3.yaml").unwrap();
+        let fake_config = FakeConfig::new("conf3.yaml", "lolkek");
 
-        config.parse();
+        Config::parse(&fake_config.path);
     }
 
     #[test]
     fn parsed_project_with_path_only() {
-        let _fake_config = FakeConfig::new("conf4.yaml", CONFIG_CONTENT);
-        let config = Config::find("conf4.yaml").unwrap();
+        let fake_config = FakeConfig::new("conf4.yaml", CONFIG_CONTENT);
 
-        let projects = config.parse();
+        let projects = Config::parse(&fake_config.path);
         let project = &projects["awesome-project"];
 
         assert_eq!(project.path, "~/Devel/Projects/awesome-project/");
@@ -98,10 +95,9 @@ mod tests {
 
     #[test]
     fn parsed_project_with_all_data() {
-        let _fake_config = FakeConfig::new("conf5.yaml", CONFIG_CONTENT);
-        let config = Config::find("conf5.yaml").unwrap();
+        let fake_config = FakeConfig::new("conf5.yaml", CONFIG_CONTENT);
 
-        let projects = config.parse();
+        let projects = Config::parse(&fake_config.path);
         let project = &projects["yet_another_project"];
 
         assert_eq!(project.path, "~/Devel/Projects/yet_another_project");
