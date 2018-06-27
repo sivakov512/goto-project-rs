@@ -19,16 +19,14 @@ type Projects = BTreeMap<String, Project>;
 
 pub struct Config {
     path: String,
-    projects: Option<BTreeMap<String, Project>>,
+    projects: Projects,
 }
 
 impl Config {
-    fn new(path: &str) -> Config {
-        let path = path.to_owned();
-        Config {
-            path,
-            projects: None,
-        }
+    pub fn new(name: &str) -> Config {
+        let path = Config::find_path(name);
+        let projects = Config::parse(&path);
+        Config { path, projects }
     }
 
     fn find_path(name: &str) -> String {
@@ -56,6 +54,16 @@ impl Config {
 mod tests {
     use super::*;
     use std::fs::{remove_file, File};
+
+    #[test]
+    fn new_returns_correct_config() {
+        let fake_config = FakeConfig::new("conf6.yaml", CONFIG_CONTENT);
+
+        let config = Config::new("conf6.yaml");
+
+        assert_eq!(&config.path, &fake_config.path);
+        assert_eq!(config.projects.len(), 2);
+    }
 
     #[test]
     #[should_panic]
