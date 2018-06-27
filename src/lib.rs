@@ -2,7 +2,6 @@
 extern crate serde_derive;
 extern crate serde_yaml;
 
-use serde_yaml::{from_str, to_value};
 use std::collections::BTreeMap;
 use std::env;
 use std::fs::File;
