@@ -1,14 +1,33 @@
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_yaml;
+
+use serde_yaml::{from_str, to_value};
+use std::collections::BTreeMap;
 use std::env;
+use std::fs::File;
+use std::io::prelude::*;
 use std::path::PathBuf;
+
+#[derive(Deserialize, Debug)]
+struct Project {
+    path: String,
+    #[serde(default)]
+    instructions: Vec<String>,
+}
 
 pub struct Config {
     path: String,
+    projects: Option<BTreeMap<String, Project>>,
 }
 
 impl Config {
     fn new(path: &str) -> Config {
         let path = path.to_owned();
-        Config { path }
+        Config {
+            path,
+            projects: None,
+        }
     }
 
     pub fn find(name: &str) -> Result<Config, String> {
@@ -21,12 +40,33 @@ impl Config {
             false => Err(format!("\"{}\" config not found", path_str)),
         }
     }
+
+    fn load(&mut self) {
+        let mut file = File::open(&self.path).unwrap();
+        let mut contents = String::new();
+
+        file.read_to_string(&mut contents).unwrap();
+
+        self.projects = serde_yaml::from_str(&contents).unwrap();
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::fs::{remove_file, File};
+
+    const CONFIG_CONTENT: &str = "
+bn2-frontend:
+  path: ~/Devel/Projects/bn2-frontend/
+
+build-trigger:
+  path: ~/Devel/Projects/build-trigger
+  instructions:
+    - source ~/Devel/Envs/py3_build-trigger/bin/activate
+    - export FLASK_APP=app.py
+    - export FLASK_DEBUG=1
+";
 
     #[test]
     fn find_returns_error_if_nothing_found() {
@@ -38,7 +78,7 @@ mod tests {
 
     #[test]
     fn find_returns_correct_config_if_found() {
-        let _fake_config = FakeConfig::new(".test-config.yaml");
+        let _fake_config = FakeConfig::new(".test-config.yaml", CONFIG_CONTENT);
 
         let result = Config::find(".test-config.yaml");
 
@@ -46,18 +86,40 @@ mod tests {
         assert!(config.path.contains(".test-config.yaml"));
     }
 
+    #[test]
+    fn loading_projects_fill_projects() {
+        let _fake_config = FakeConfig::new(".test-config.yaml", CONFIG_CONTENT);
+        let mut config = Config::find(".test-config.yaml").unwrap();
+
+        config.load();
+
+        assert!(config.projects.is_some());
+        assert_eq!(config.projects.unwrap().len(), 2);
+    }
+
+    #[test]
+    #[should_panic]
+    fn loading_invalid_config_should_panic() {
+        let _fake_config = FakeConfig::new(".test-config.yaml", "lolkek");
+        let mut config = Config::find(".test-config.yaml").unwrap();
+
+        config.load();
+    }
+
     struct FakeConfig {
         path: String,
     }
 
     impl FakeConfig {
-        fn new(name: &str) -> FakeConfig {
+        fn new(name: &str, contents: &str) -> FakeConfig {
             let mut path: PathBuf = env::home_dir().unwrap();
             path.push(name);
 
             let path = path.to_str().unwrap();
+            let mut file = File::create(path).unwrap();
 
-            File::create(path).unwrap();
+            file.write_all(contents.as_bytes()).unwrap();
+            file.flush().unwrap();
 
             FakeConfig {
                 path: path.to_owned(),
