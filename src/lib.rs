@@ -31,14 +31,14 @@ impl Config {
         }
     }
 
-    fn find_path(name: &str) -> Result<String, String> {
-        let mut path: PathBuf = env::home_dir().ok_or("Home dir not found on your system")?;
+    fn find_path(name: &str) -> String {
+        let mut path: PathBuf = env::home_dir().unwrap();
         path.push(name);
 
         let path_str = path.to_str().unwrap();
         match path.exists() {
-            true => Ok(path_str.to_owned()),
-            false => Err(format!("\"{}\" config not found", path_str)),
+            true => path_str.to_owned(),
+            false => panic!(format!("\"{}\" config not found", path_str)),
         }
     }
 
@@ -58,11 +58,9 @@ mod tests {
     use std::fs::{remove_file, File};
 
     #[test]
-    fn find_returns_error_if_nothing_found() {
-        let result = Config::find_path("nonexistence_config.yaml");
-
-        let err = result.err().unwrap();
-        assert!(err.contains("nonexistence_config.yaml\" config not found"));
+    #[should_panic]
+    fn find_path_should_panic_if_nothing_found() {
+        Config::find_path("nonexistence_config.yaml");
     }
 
     #[test]
@@ -71,7 +69,7 @@ mod tests {
 
         let result = Config::find_path("conf1.yaml");
 
-        assert!(result.unwrap().contains("conf1.yaml"));
+        assert!(result.contains("conf1.yaml"));
     }
 
     #[test]
