@@ -93,6 +93,37 @@ mod tests {
         config.load();
     }
 
+    #[test]
+    fn loaded_project_with_path_only() {
+        let _fake_config = FakeConfig::new("conf4.yaml", CONFIG_CONTENT);
+        let mut config = Config::find("conf4.yaml").unwrap();
+
+        config.load();
+        let project = &config.projects.unwrap()["awesome-project"];
+
+        assert_eq!(project.path, "~/Devel/Projects/awesome-project/");
+        assert_eq!(project.instructions.len(), 0);
+    }
+
+    #[test]
+    fn loaded_project_with_all_data() {
+        let _fake_config = FakeConfig::new("conf5.yaml", CONFIG_CONTENT);
+        let mut config = Config::find("conf5.yaml").unwrap();
+
+        config.load();
+        let project = &config.projects.unwrap()["yet_another_project"];
+
+        assert_eq!(project.path, "~/Devel/Projects/yet_another_project");
+        assert_eq!(
+            project.instructions,
+            vec![
+                "source ~/Devel/Envs/yet_another_project/bin/activate",
+                "export FLASK_APP=app.py",
+                "export FLASK_DEBUG=1",
+            ]
+        );
+    }
+
     const CONFIG_CONTENT: &str = "
 awesome-project:
   path: ~/Devel/Projects/awesome-project/
