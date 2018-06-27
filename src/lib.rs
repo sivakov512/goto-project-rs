@@ -56,13 +56,13 @@ mod tests {
     use std::fs::{remove_file, File};
 
     const CONFIG_CONTENT: &str = "
-bn2-frontend:
-  path: ~/Devel/Projects/bn2-frontend/
+awesome-project:
+  path: ~/Devel/Projects/awesome-project/
 
-build-trigger:
-  path: ~/Devel/Projects/build-trigger
+yet_another_project:
+  path: ~/Devel/Projects/yet_another_project
   instructions:
-    - source ~/Devel/Envs/py3_build-trigger/bin/activate
+    - source ~/Devel/Envs/yet_another_project/bin/activate
     - export FLASK_APP=app.py
     - export FLASK_DEBUG=1
 ";
@@ -77,18 +77,18 @@ build-trigger:
 
     #[test]
     fn find_returns_correct_config_if_found() {
-        let _fake_config = FakeConfig::new(".test-config.yaml", CONFIG_CONTENT);
+        let _fake_config = FakeConfig::new("conf1.yaml", CONFIG_CONTENT);
 
-        let result = Config::find(".test-config.yaml");
+        let result = Config::find("conf1.yaml");
 
         let config = result.unwrap();
-        assert!(config.path.contains(".test-config.yaml"));
+        assert!(config.path.contains("conf1.yaml"));
     }
 
     #[test]
     fn loading_projects_fill_projects() {
-        let _fake_config = FakeConfig::new(".test-config.yaml", CONFIG_CONTENT);
-        let mut config = Config::find(".test-config.yaml").unwrap();
+        let _fake_config = FakeConfig::new("conf2.yaml", CONFIG_CONTENT);
+        let mut config = Config::find("conf2.yaml").unwrap();
 
         config.load();
 
@@ -99,8 +99,8 @@ build-trigger:
     #[test]
     #[should_panic]
     fn loading_invalid_config_should_panic() {
-        let _fake_config = FakeConfig::new(".test-config.yaml", "lolkek");
-        let mut config = Config::find(".test-config.yaml").unwrap();
+        let _fake_config = FakeConfig::new("conf3.yaml", "lolkek");
+        let mut config = Config::find("conf3.yaml").unwrap();
 
         config.load();
     }
