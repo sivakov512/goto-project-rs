@@ -11,13 +11,14 @@ impl Config {
         Config { path }
     }
 
-    pub fn find(name: &str) -> Result<Config, &'static str> {
+    pub fn find(name: &str) -> Result<Config, String> {
         let mut path: PathBuf = env::home_dir().ok_or("Home dir not found on your system")?;
         path.push(name);
 
+        let path_str = path.to_str().unwrap();
         match path.exists() {
-            true => Ok(Config::new(path.to_str().unwrap())),
-            false => Err("Zhopa"),
+            true => Ok(Config::new(path_str)),
+            false => Err(format!("\"{}\" config not found", path_str)),
         }
     }
 }
@@ -31,7 +32,8 @@ mod tests {
     fn find_returns_error_if_nothing_found() {
         let result = Config::find("nonexistence_config.yaml");
 
-        assert!(result.is_err())
+        let err = result.err().unwrap();
+        assert!(err.contains("nonexistence_config.yaml\" config not found"));
     }
 
     #[test]
@@ -41,12 +43,7 @@ mod tests {
         let result = Config::find(".test-config.yaml");
 
         let config = result.unwrap();
-        assert!(
-            config
-                .path
-                .as_str()
-                .contains(".test-config.yaml")
-        );
+        assert!(config.path.contains(".test-config.yaml"));
     }
 
     struct FakeConfig {
