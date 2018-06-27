@@ -25,6 +25,7 @@ impl Config {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs::{remove_file, File};
 
     #[test]
     fn find_returns_error_if_nothing_found() {
@@ -35,12 +36,44 @@ mod tests {
 
     #[test]
     fn find_returns_correct_config_if_found() {
-        let result = Config::find(".goto-project.yaml");
+        let _fake_config = FakeConfig::new(".test-config.yaml");
+
+        let result = Config::find(".test-config.yaml");
 
         let config = result.unwrap();
-        assert_eq!(
-            config.path,
-            "/home/sivakov512/.goto-project.yaml".to_owned()
+        assert!(
+            config
+                .path
+                .as_str()
+                .contains(".test-config.yaml")
         );
+    }
+
+    struct FakeConfig {
+        path: String,
+    }
+
+    impl FakeConfig {
+        fn new(name: &str) -> FakeConfig {
+            let mut path: PathBuf = env::home_dir().unwrap();
+            path.push(name);
+
+            let path = path.to_str().unwrap();
+
+            File::create(path).unwrap();
+
+            FakeConfig {
+                path: path.to_owned(),
+            }
+        }
+    }
+
+    impl Drop for FakeConfig {
+        fn drop(&mut self) {
+            let path = self.path.clone();
+            remove_file(path).expect(
+                format!("Something went wront when removing test file \"{}\"!", "a").as_str(),
+            );
+        }
     }
 }
