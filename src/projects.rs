@@ -1,12 +1,27 @@
 use config::ConfigLoader;
 use serde_yaml;
 use std::collections::BTreeMap;
+use std::env;
 
 #[derive(Deserialize, Debug)]
 pub struct Project {
     path: String,
     #[serde(default)]
     instructions: Vec<String>,
+}
+
+impl Project {
+    fn command_string(&self) -> String {
+        let shell = env::var("SHELL").unwrap();
+
+        let end = vec![shell, "clear".to_owned()].join(" && ");
+        if self.instructions.len() == 0 {
+            end
+        } else {
+            let instructions = self.instructions.join(" && ");
+            format!("{} && {}", instructions, end)
+        }
+    }
 }
 
 pub type Projects = BTreeMap<String, Project>;
@@ -70,6 +85,33 @@ mod tests {
 
         assert_eq!(project.path, "~/Devel/Projects/awesome-project/");
         assert_eq!(project.instructions.len(), 0);
+    }
+
+    #[test]
+    fn command_string_for_project_without_instructions() {
+        let shell = env::var("SHELL").unwrap();
+
+        let project = Project {
+            path: String::new(),
+            instructions: vec![],
+        };
+
+        assert_eq!(project.command_string(), format!("{} && clear", shell));
+    }
+
+    #[test]
+    fn command_string_for_project_with_instructions() {
+        let shell = env::var("SHELL").unwrap();
+
+        let project = Project {
+            path: String::new(),
+            instructions: vec!["call_something".to_owned(), "source /stuff".to_owned()],
+        };
+
+        assert_eq!(
+            project.command_string(),
+            format!("call_something && source /stuff && {} && clear", shell)
+        );
     }
 
     const CONFIG_CONTENT: &str = "
