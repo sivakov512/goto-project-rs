@@ -19,29 +19,24 @@ type Projects = BTreeMap<String, Project>;
 
 pub struct Config {
     path: String,
-    projects: Projects,
 }
 
 impl Config {
     pub fn new(name: &str) -> Config {
-        let path = Config::find_path(name);
-        let projects = Config::parse(&path);
-        Config { path, projects }
-    }
-
-    fn find_path(name: &str) -> String {
         let mut path: PathBuf = env::home_dir().unwrap();
         path.push(name);
 
         let path_str = path.to_str().unwrap();
-        match path.exists() {
+        let path = match path.exists() {
             true => path_str.to_owned(),
             false => panic!(format!("\"{}\" config not found", path_str)),
-        }
+        };
+
+        Config { path }
     }
 
-    fn parse(path: &str) -> Projects {
-        let mut file = File::open(path).unwrap();
+    fn parse(&self) -> Projects {
+        let mut file = File::open(&self.path).unwrap();
         let mut contents = String::new();
 
         file.read_to_string(&mut contents).unwrap();
@@ -62,59 +57,31 @@ mod tests {
         let config = Config::new("conf6.yaml");
 
         assert_eq!(&config.path, &fake_config.path);
-        assert_eq!(config.projects.len(), 2);
     }
 
     #[test]
     #[should_panic]
-    fn find_path_should_panic_if_nothing_found() {
-        Config::find_path("nonexistence_config.yaml");
-    }
-
-    #[test]
-    fn find_returns_correct_config_if_found() {
-        let _fake_config = FakeConfig::new("conf1.yaml", CONFIG_CONTENT);
-
-        let result = Config::find_path("conf1.yaml");
-
-        assert!(result.contains("conf1.yaml"));
+    fn new_should_panic_if_config_file_not_found() {
+        Config::new("nonexistence_config.yaml");
     }
 
     #[test]
     #[should_panic]
     fn invalid_config_parsing_should_panic() {
-        let fake_config = FakeConfig::new("conf3.yaml", "lolkek");
+        let _fake_config = FakeConfig::new("conf3.yaml", "lolkek");
+        let config = Config::new("conf3.yaml");
 
-        Config::parse(&fake_config.path);
+        config.parse();
     }
 
     #[test]
-    fn parsed_project_with_path_only() {
-        let fake_config = FakeConfig::new("conf4.yaml", CONFIG_CONTENT);
+    fn parse_returns_all_founded_projects() {
+        let _fake_config = FakeConfig::new("conf4.yaml", CONFIG_CONTENT);
+        let config = Config::new("conf4.yaml");
 
-        let projects = Config::parse(&fake_config.path);
-        let project = &projects["awesome-project"];
+        let projects = config.parse();
 
-        assert_eq!(project.path, "~/Devel/Projects/awesome-project/");
-        assert_eq!(project.instructions.len(), 0);
-    }
-
-    #[test]
-    fn parsed_project_with_all_data() {
-        let fake_config = FakeConfig::new("conf5.yaml", CONFIG_CONTENT);
-
-        let projects = Config::parse(&fake_config.path);
-        let project = &projects["yet_another_project"];
-
-        assert_eq!(project.path, "~/Devel/Projects/yet_another_project");
-        assert_eq!(
-            project.instructions,
-            vec![
-                "source ~/Devel/Envs/yet_another_project/bin/activate",
-                "export FLASK_APP=app.py",
-                "export FLASK_DEBUG=1",
-            ]
-        );
+        assert_eq!(projects.len(), 2);
     }
 
     const CONFIG_CONTENT: &str = "
