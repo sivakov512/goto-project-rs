@@ -2,6 +2,7 @@
 name = "goto_project"
 version = "0.1.0"
 authors = ["Nikita Sivakov <sivakov512@gmail.com>"]
+publish = false
 
 [dependencies]
 serde = "1.0"
