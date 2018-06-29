@@ -7,3 +7,4 @@ authors = ["Nikita Sivakov <sivakov512@gmail.com>"]
 serde = "1.0"
 serde_derive = "1.0"
 serde_yaml = "0.7"
+subprocess = "0.1"
