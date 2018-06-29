@@ -48,6 +48,20 @@ impl ProjectsParser for Projects {
     }
 }
 
+pub trait ProjectsListing {
+    fn list(&self) -> Vec<String>;
+}
+
+impl ProjectsListing for Projects {
+    fn list(&self) -> Vec<String> {
+        let mut list: Vec<String> = vec![];
+        for name in self.keys() {
+            list.push(name.clone())
+        }
+        list
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -67,6 +81,19 @@ mod tests {
         let fake_config = FakeConfig::new("azaza");
 
         Projects::parse(&fake_config);
+    }
+
+    #[test]
+    fn list_returns_all_project_names() {
+        let fake_config = FakeConfig::new(CONFIG_CONTENT);
+        let projects = Projects::parse(&fake_config);
+
+        let project_names = projects.list();
+
+        assert_eq!(
+            project_names,
+            vec!["awesome-project", "yet_another_project"]
+        );
     }
 
     #[test]
@@ -91,7 +118,7 @@ mod tests {
     fn project_without_instructions_parsed_correctly() {
         let fake_config = FakeConfig::new(CONFIG_CONTENT);
 
-        let projects = Projects::parse(&fake_config);
+        let projects: Projects = Projects::parse(&fake_config);
         let project: &Project = &projects["awesome-project"];
 
         assert_eq!(project.path, "~/Devel/Projects/awesome-project/");
