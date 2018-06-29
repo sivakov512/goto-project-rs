@@ -7,12 +7,12 @@ pub trait ConfigLoader {
     fn load(&self) -> String;
 }
 
-struct Config {
+pub struct Config {
     path: String,
 }
 
 impl Config {
-    fn new(name: &str) -> Config {
+    pub fn new(name: &str) -> Config {
         let mut path: PathBuf = env::home_dir().unwrap();
         path.push(name);
 

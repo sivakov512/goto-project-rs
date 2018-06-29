@@ -5,7 +5,7 @@ use std::env;
 use subprocess::Exec;
 
 #[derive(Deserialize, Debug)]
-struct Project {
+pub struct Project {
     path: String,
     #[serde(default)]
     instructions: Vec<String>,
@@ -26,7 +26,7 @@ impl Project {
         command_parts.join(" && ")
     }
 
-    fn open(&self) {
+    pub fn open(&self) {
         Exec::cmd(env::var("SHELL").unwrap())
             .arg("-c")
             .arg(self.command_string())
@@ -35,7 +35,7 @@ impl Project {
     }
 }
 
-type Projects = BTreeMap<String, Project>;
+pub type Projects = BTreeMap<String, Project>;
 
 pub trait ProjectsParser {
     fn parse(config: &ConfigLoader) -> Projects;
