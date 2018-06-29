@@ -1,11 +1,7 @@
 use std::env;
 use std::fs::File;
-use std::io::prelude::*;
+use std::io::Read;
 use std::path::PathBuf;
-
-pub trait ConfigLoader {
-    fn load(&self) -> String;
-}
 
 pub struct Config {
     path: String,
@@ -26,6 +22,10 @@ impl Config {
     }
 }
 
+pub trait ConfigLoader {
+    fn load(&self) -> String;
+}
+
 impl ConfigLoader for Config {
     fn load(&self) -> String {
         let mut file = File::open(&self.path).unwrap();
@@ -41,6 +41,7 @@ impl ConfigLoader for Config {
 mod tests {
     use super::*;
     use std::fs::remove_file;
+    use std::io::Write;
 
     #[test]
     fn new_returns_correct_config() {

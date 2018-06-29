@@ -1,5 +1,5 @@
 use config::Config;
-use projects::{Projects, ProjectsParser, ProjectsListing};
+use projects::{Projects, ProjectsListing, ProjectsParser};
 
 pub struct Manager {
     projects: Projects,
@@ -13,8 +13,7 @@ impl Manager {
     }
 
     pub fn open_project(&self, name: &str) {
-        let project = self.projects.get(name).unwrap();
-        project.open();
+        &self.projects[name].open();
     }
 
     pub fn list_projects(&self) -> Vec<String> {

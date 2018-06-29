@@ -18,9 +18,7 @@ impl Project {
         command_parts.push(format!("cd {}", &self.path));
         command_parts.extend(self.instructions.clone());
 
-        let shell = env::var("SHELL").unwrap();
-        command_parts.push(shell);
-
+        command_parts.push(env::var("SHELL").unwrap());
         command_parts.push(String::from("clear"));
 
         command_parts.join(" && ")
