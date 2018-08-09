@@ -8,7 +8,6 @@ repository = "https://github.com/sivakov512/goto-project-rs"
 readme = "README.md"
 keywords = ["rust", "cli", "project-management", "utilities"]
 categories = ["command-line-utilities"]
-license = "MIT"
 license-file = "LICENSE"
 
 autobins = false
@@ -18,6 +17,7 @@ travis-ci = { repository = "sivakov512/goto-project-rs", branch = "master" }
 
 [[bin]]
 name = "gt"
+path = "src/main.rs"
 
 [dependencies]
 clap = "2.32"
