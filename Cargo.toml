@@ -2,7 +2,17 @@
 name = "goto_project"
 version = "0.1.0"
 authors = ["Nikita Sivakov <sivakov512@gmail.com>"]
-publish = false
+
+description = "Easy and fast project switching in your shell!"
+repository = "https://github.com/sivakov512/goto-project-rs"
+readme = "README.md"
+keywords = ["rust", "cli", "project-management", "utilities"]
+categories = ["command-line-utilities"]
+license = "MIT"
+license-file = "LICENSE"
+
+[badges]
+travis-ci = { repository = "sivakov512/goto-project-rs", branch = "master" }
 
 [dependencies]
 clap = "2.32"

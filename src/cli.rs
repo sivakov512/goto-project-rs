@@ -5,7 +5,7 @@ fn build_cli<'a>(project_list: &[&'a str]) -> App<'a, 'a> {
     App::new("Goto project")
         .version(crate_version!())
         .author(crate_authors!())
-        .about("Easy and fast project switching in your shell!")
+        .about(crate_description!())
         .after_help(
             "Before usage write configuration of your projects list in ~/.goto-project.yaml",
         )
