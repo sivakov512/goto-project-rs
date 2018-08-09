@@ -1,0 +1,3 @@
+#compdef gt
+
+_alternative "projects: project:($(gt))"
