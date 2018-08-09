@@ -11,8 +11,13 @@ categories = ["command-line-utilities"]
 license = "MIT"
 license-file = "LICENSE"
 
+autobins = false
+
 [badges]
 travis-ci = { repository = "sivakov512/goto-project-rs", branch = "master" }
+
+[[bin]]
+name = "gt"
 
 [dependencies]
 clap = "2.32"
