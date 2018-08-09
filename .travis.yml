@@ -9,7 +9,7 @@ before_script:
 
 script:
   - cargo fmt --all -- --check
-  - cargo build --verbose --locked
+  - cargo build --verbose
   - cargo test --verbose --all
 
 before_deploy:
