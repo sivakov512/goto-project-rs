@@ -1,13 +1,6 @@
-#[macro_use]
-extern crate serde_derive;
-extern crate serde_yaml;
-extern crate subprocess;
+extern crate goto_project;
 
-mod config;
-mod manager;
-mod projects;
-
-use manager::Manager;
+use goto_project::manager::Manager;
 
 fn main() {
     let manager = Manager::new(".goto-project.yaml");
