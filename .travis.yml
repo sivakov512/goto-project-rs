@@ -11,3 +11,25 @@ script:
   - cargo fmt --all -- --check
   - cargo build --verbose --locked
   - cargo test --verbose --all
+
+before_deploy:
+  - cargo build --release
+
+deploy:
+  - provider: script
+    script: cargo publish --token $CRATES_TOKEN
+    skip_cleanup: true
+    on:
+        tags: true
+
+  - provider: releases
+    api_key:
+        secure: AvSCkqrq/h0AhlAgK6UI3gqYt33UDyTCgwXebbG/wYX3Q3zqG2rak3DKt6oNrKT8+GaXFEaCizUppqr1e4LNtQiTBr/CUG4rRSqDMmdLNR04w5ccjAHPENex04V6xhAdbggzpC2z/ca5n8uvwmxE7FC5HkrKjQZLu9oBrXiiuXTFoYRqLiSLfRA612fuJFeu7bGhKQdgyfVYiR+YPXp3VphsKgGmJ+qmJEfXJ+ZiQwkVsc569CHf2+1UTItkEZuKRBTBRivwsN53tBNq0oVkq7shArpvpwUfxfvGL0SRcZ+2182nx4mVc6qRR4M+vvY/cbQ9w4S3dXR+kEvhaPwA40hVd7odkRHI37BiXcnYJ56s41cfJqczsyImMZiCntHKRYVogkg24J42YpLu1kGg6NvICuCOnAEQ0SoGvcmPXTHdahA64v4xNrAxmuJW7zxvnN6lvEM/U6AGAl9tpYxDBBt1BvMxY1Wg5bkFhFOZGQJ8W4iFi3pXZMG43gatGJ6vSXy6drGVJv9QLUXTXder7TFLrJmd96BIPXG7xQGUf94AeJ2bH6H2fX6urG9TtKpLkZwffBLyr3ibGqEE1pReGeTIzfDmWqRaaQ+VEDp67vR4jC+xF0xUCffP6QF44BpeVM2sJ/bX6KWBJImX1TTuddoh/b8/AmfmVdPxBvIVu0Q=
+    file: target/release/gt
+    skip_cleanup: true
+    on:
+        tags: true
+
+env:
+  global:
+    secure: kJRYBEccAd798Urw9U0XOBfTGc9sym+0ZxYoV4yRUducvfvfFYU1DXTSfEuO88A9vOak/1in67llGT8JuYfQZDoHHiV7oygDuiCcD88KFR66nX7FVEw+VvolLq8Jw3PA7MsL0hPjxGgsVn177cqGo+mDMQ7gD+kykLbSr2R331/GY6HCo1mo3mtzom5PQyCXZ93tJhWP/wJpqtuY5kezUdNY6obvSuGaOfM2C2xKaGl6xS+rH2SpD2IgHKTr3ER4LYdnWUHYxdlhl2PRi6Tj3xO1sa4/r4cdYh7x8YOR2c14czg4bcSunO+iCaJO4lcZ7yVycyefnjnAlAWxViifQa5gxnHUO6B5ZafZTsE4C3y4j3v7xo2y6k0dXxlH1UOtvCjXHYytBYSc/HiFKL2WCXhdkRp46pixOyB+zCzYRx3sseewNpZldqWQKIXPTVwurBSDykX1uSE3Zap5PZ+uNnfu1Lzu4fS3Q+s/IRhKDsrwv1HBOCSXS9kSV3waZCpVgy9M1+wrgZMRX2UNvbVHC3qKdHkQfi+hTiOTJ34qNJyHo3jz8cNYvAL41B3Flh45S2QDWW2Mxt4+naC17PqB3VxXcQy8FzSlCsAC4ZLFh1Hex96t9Xi56RzD9FTxhknjE5D0FE2az52PV8IvFdsjb+9V9pqCWWvobUe8aRs6Ibc=
