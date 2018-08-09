@@ -1,8 +1,7 @@
 extern crate goto_project;
 
-use goto_project::manager::Manager;
+use goto_project::cli;
 
 fn main() {
-    let manager = Manager::new(".goto-project.yaml");
-    manager.open_project("py_goto_project");
+    cli::run_cli();
 }
