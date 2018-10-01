@@ -1,4 +1,4 @@
-use std::env;
+use dirs;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
@@ -9,16 +9,18 @@ pub struct Config {
 
 impl Config {
     pub fn new(name: &str) -> Config {
-        let mut path: PathBuf = env::home_dir().unwrap();
+        let mut path: PathBuf = dirs::home_dir().unwrap();
         path.push(name);
 
         let path_str = path.to_str().unwrap();
-        let path = match path.exists() {
-            true => path_str.to_owned(),
-            false => panic!(format!("\"{}\" config not found", path_str)),
-        };
 
-        Config { path }
+        if !path.exists() {
+            panic!(format!("\"{}\" config not found", path_str))
+        }
+
+        Config {
+            path: path_str.to_owned(),
+        }
     }
 }
 
@@ -72,7 +74,7 @@ mod tests {
 
     impl FakeConfig {
         fn new(name: &str, contents: &str) -> FakeConfig {
-            let mut path: PathBuf = env::home_dir().unwrap();
+            let mut path: PathBuf = dirs::home_dir().unwrap();
             path.push(name);
 
             let path = path.to_str().unwrap();
@@ -90,9 +92,12 @@ mod tests {
     impl Drop for FakeConfig {
         fn drop(&mut self) {
             let path = self.path.clone();
-            remove_file(path).expect(
-                format!("Something went wront when removing test file \"{}\"!", "a").as_str(),
-            );
+            remove_file(path).unwrap_or_else(|_| {
+                panic!(format!(
+                    "Something went wront when removing test file \"{}\"!",
+                    "a"
+                ))
+            });
         }
     }
 }
