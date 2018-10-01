@@ -8,8 +8,7 @@ fn build_cli<'a>(project_list: &[&'a str]) -> App<'a, 'a> {
         .about(crate_description!())
         .after_help(
             "Before usage write configuration of your projects list in ~/.goto-project.yaml",
-        )
-        .arg(
+        ).arg(
             Arg::with_name("project")
                 .takes_value(true)
                 .possible_values(project_list)
