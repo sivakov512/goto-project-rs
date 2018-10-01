@@ -13,7 +13,7 @@ impl Manager {
     }
 
     pub fn open_project(&self, name: &str) {
-        &self.projects[name].open();
+        self.projects[name].open();
     }
 
     pub fn list_projects(&self) -> Vec<String> {
