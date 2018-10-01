@@ -1,6 +1,6 @@
 [package]
 name = "goto_project"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Nikita Sivakov <sivakov512@gmail.com>"]
 
 description = "Easy and fast project switching in your shell!"
@@ -8,7 +8,7 @@ repository = "https://github.com/sivakov512/goto-project-rs"
 readme = "README.md"
 keywords = ["rust", "cli", "project-management", "utilities"]
 categories = ["command-line-utilities"]
-license-file = "LICENSE"
+license = "MIT"
 
 autobins = false
 
