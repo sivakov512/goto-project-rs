@@ -1,5 +1,6 @@
+use clap::{crate_authors, crate_description, crate_version};
 use clap::{App, Arg};
-use manager::Manager;
+use crate::manager::Manager;
 
 fn build_cli<'a>(project_list: &[&'a str]) -> App<'a, 'a> {
     App::new("Goto project")
