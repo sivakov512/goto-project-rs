@@ -16,7 +16,7 @@ fn build_cli<'a>(project_list: &[&'a str]) -> App<'a, 'a> {
         )
 }
 
-pub fn run_cli() -> () {
+pub fn run_cli() {
     let manager = Manager::new(".goto-project.yaml");
 
     let project_list = manager.list_projects();
