@@ -1,6 +1,6 @@
+use crate::manager::Manager;
 use clap::{crate_authors, crate_description, crate_version};
 use clap::{App, Arg};
-use crate::manager::Manager;
 
 fn build_cli<'a>(project_list: &[&'a str]) -> App<'a, 'a> {
     App::new("Goto project")
@@ -9,7 +9,8 @@ fn build_cli<'a>(project_list: &[&'a str]) -> App<'a, 'a> {
         .about(crate_description!())
         .after_help(
             "Before usage write configuration of your projects list in ~/.goto-project.yaml",
-        ).arg(
+        )
+        .arg(
             Arg::with_name("project")
                 .takes_value(true)
                 .possible_values(project_list)
