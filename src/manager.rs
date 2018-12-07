@@ -1,5 +1,5 @@
-use config::Config;
-use projects::{Projects, ProjectsListing, ProjectsParser};
+use crate::config::Config;
+use crate::projects::{Projects, ProjectsListing, ProjectsParser};
 
 pub struct Manager {
     projects: Projects,
