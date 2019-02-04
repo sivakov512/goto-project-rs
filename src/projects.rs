@@ -96,7 +96,7 @@ mod tests {
     }
 
     #[test]
-    fn project_with_all_data_parsed_correctly() {
+    fn project_with_instructions_parsed_correctly() {
         let fake_config = FakeConfig::new(CONFIG_CONTENT);
 
         let projects = Projects::parse(&fake_config);
