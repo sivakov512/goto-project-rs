@@ -1,9 +1,17 @@
+dist: xenial
+addons:
+  apt:
+    packages:
+      - kcov
+    sources:
+      - sourceline: 'ppa:sivakov512/kcov'
+
 language: rust
 rust:
   - stable
 
-cache:
-  cargo: true
+env:
+  - RUSTFLAGS="-C link-dead-code"
 
 before_cache:
   - find ./target -name "*goto_project-*" -exec rm -rf "{}" \;
@@ -11,17 +19,25 @@ before_cache:
   - rm -rf ./target/.rustc_info.json
   - cargo clean -p goto-project
 
+cache:
+  cargo: true
+
 before_script:
-  - rustup component add rustfmt-preview
-  - rustup component add clippy-preview
+  - rustup component add rustfmt
+  - rustup component add clippy
 
 script:
   - cargo fmt --all -- --check
   - cargo clippy -- -D warnings
-  - cargo test --verbose --all
+  - |
+    cargo test --verbose --all --no-run &&
+    export CARGO_TEST_BIN=`find ./target/debug/ -maxdepth 1 -name "gt-*" -not -name "*.d"` &&
+    echo "Compiled binary with tests found at: $CARGO_TEST_BIN" &&
+    kcov --coveralls-id=$TRAVIS_JOB_ID --exclude-pattern=/.cargo,/usr/lib,/usr/include target/cov $CARGO_TEST_BIN
+
 
 before_deploy:
-  - cargo build --release
+  - RUSTFLAGS="" cargo build --release
 
 deploy:
   - provider: script

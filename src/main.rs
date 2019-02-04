@@ -1,6 +1,7 @@
-extern crate goto_project;
-
-use goto_project::cli;
+mod cli;
+mod config;
+mod manager;
+mod projects;
 
 fn main() {
     cli::run_cli();
