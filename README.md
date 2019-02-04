@@ -6,6 +6,7 @@ This is a like `workon` for python, but more powerfull and not only for python.
 
 [![Build Status](https://travis-ci.com/sivakov512/goto-project-rs.svg?branch=master)](https://travis-ci.com/sivakov512/goto-project-rs)
 [![Crates.io](https://img.shields.io/crates/v/goto_project.svg)](https://crates.io/crates/goto_project/)
+[![Coverage Status](https://coveralls.io/repos/github/sivakov512/goto-project-rs/badge.svg?branch=master)](https://coveralls.io/github/sivakov512/goto-project-rs?branch=master)
 
 
 Configuration and usage
