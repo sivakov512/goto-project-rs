@@ -10,6 +10,10 @@ pub struct Project {
     path: String,
     #[serde(default)]
     instructions: Vec<String>,
+    #[serde(default = "default_shell")]
+    command: String,
+    #[serde(default = "default_clear_on_exit")]
+    clear_on_exit: bool,
 }
 
 impl Project {
@@ -19,8 +23,10 @@ impl Project {
         command_parts.push(format!("cd {}", &self.path));
         command_parts.extend(self.instructions.clone());
 
-        command_parts.push(env::var("SHELL").unwrap());
-        command_parts.push(String::from("clear"));
+        command_parts.push(self.command.clone());
+        if self.clear_on_exit {
+            command_parts.push(String::from("clear"));
+        }
 
         command_parts.join(" && ")
     }
@@ -61,6 +67,14 @@ impl ProjectsListing for Projects {
     }
 }
 
+fn default_shell() -> String {
+    env::var("SHELL").unwrap()
+}
+
+fn default_clear_on_exit() -> bool {
+    true
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -97,6 +111,7 @@ mod tests {
 
     #[test]
     fn project_with_instructions_parsed_correctly() {
+        let shell = env::var("SHELL").unwrap();
         let fake_config = FakeConfig::new(CONFIG_CONTENT);
 
         let projects = Projects::parse(&fake_config);
@@ -110,7 +125,9 @@ mod tests {
                 "export FLASK_APP=app.py",
                 "export FLASK_DEBUG=1",
             ]
-        )
+        );
+        assert_eq!(project.command, shell);
+        assert_eq!(project.clear_on_exit, true);
     }
 
     #[test]
@@ -122,6 +139,8 @@ mod tests {
 
         assert_eq!(project.path, "~/Devel/Projects/awesome-project/");
         assert_eq!(project.instructions.len(), 0);
+        assert_eq!(project.command, "vim");
+        assert_eq!(project.clear_on_exit, false);
     }
 
     #[test]
@@ -131,6 +150,8 @@ mod tests {
         let project = Project {
             path: String::from("/path/"),
             instructions: vec![],
+            command: shell.clone(),
+            clear_on_exit: true,
         };
 
         assert_eq!(
@@ -146,6 +167,8 @@ mod tests {
         let project = Project {
             path: String::from("/some/path/"),
             instructions: vec!["call_something".to_owned(), "source /stuff".to_owned()],
+            command: shell.clone(),
+            clear_on_exit: true,
         };
 
         assert_eq!(
@@ -160,6 +183,8 @@ mod tests {
     const CONFIG_CONTENT: &str = "
 awesome-project:
   path: ~/Devel/Projects/awesome-project/
+  command: vim
+  clear_on_exit: false
 
 yet_another_project:
   path: ~/Devel/Projects/yet_another_project
