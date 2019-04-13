@@ -22,7 +22,10 @@ pub fn run_cli() {
     let manager = Manager::new(".goto-project.yaml");
 
     let project_list = manager.list_projects();
-    let project_list: Vec<&str> = project_list.iter().map(|p| p.as_ref()).collect();
+    let project_list: Vec<&str> = project_list
+        .iter()
+        .map(std::convert::AsRef::as_ref)
+        .collect();
 
     let matches = build_cli(project_list.as_slice()).get_matches();
 
