@@ -37,11 +37,11 @@ impl Project {
 pub type Projects = BTreeMap<String, Project>;
 
 pub trait ProjectsParser {
-    fn parse(config: &ConfigLoader) -> Projects;
+    fn parse(config: &dyn ConfigLoader) -> Projects;
 }
 
 impl ProjectsParser for Projects {
-    fn parse(config: &ConfigLoader) -> Projects {
+    fn parse(config: &dyn ConfigLoader) -> Projects {
         let contents = &config.load();
         serde_yaml::from_str(&contents).unwrap()
     }
