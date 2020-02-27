@@ -1,0 +1,32 @@
+name: test
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+
+    env:
+      SHELL: /bin/bash
+
+    runs-on: ${{matrix.os}}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build
+      run: cargo build --verbose
+
+    - name: Checking style with fmt
+      run: cargo fmt --all -- --check
+
+    - name: Linting with Clippy
+      run: cargo clippy -- -D warnings
+
+    - name: Run tests
+      run: cargo test --verbose
+
