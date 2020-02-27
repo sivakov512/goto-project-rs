@@ -30,3 +30,9 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
 
+    - name: Upload debug artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: gt-debug-${{matrix.os}}
+        path: target/debug/gt
+
