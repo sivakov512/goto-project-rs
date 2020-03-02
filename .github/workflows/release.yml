@@ -1,0 +1,88 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+
+    env:
+      SHELL: /bin/bash
+
+    runs-on: ${{matrix.os}}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build
+      run: cargo build --release --verbose
+
+    - name: Checking style with fmt
+      run: cargo fmt --all -- --check
+
+    - name: Linting with Clippy
+      run: cargo clippy -- -D warnings
+
+    - name: Run tests
+      run: cargo test --verbose
+
+    - name: Upload release artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: gt-${{matrix.os}}-${{github.sha}}-release
+        path: target/release/gt
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Download linux artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: gt-ubuntu-latest-${{github.sha}}-release
+        path: gt-linux-${{github.ref}}-release
+
+    - name: Download macos artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: gt-macos-latest-${{github.sha}}-release
+        path: gt-macos-${{github.ref}}-release
+
+    - name: Upload linux asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: gt-linux-${{github.ref}}-release/gt
+        asset_name: gt-linux-${{github.ref}}-release
+        asset_content_type: application/octet-stream
+
+    - name: Upload macos asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: gt-macos-${{github.ref}}-release/gt
+        asset_name: gt-macos-${{github.ref}}-release
+        asset_content_type: application/octet-stream
