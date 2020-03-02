@@ -33,6 +33,5 @@ jobs:
     - name: Upload debug artifact
       uses: actions/upload-artifact@v1
       with:
-        name: gt-debug-${{matrix.os}}
+        name: gt-${{matrix.os}}-{{github.sha}}-debug
         path: target/debug/gt
-
