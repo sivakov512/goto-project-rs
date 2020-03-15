@@ -6,7 +6,6 @@ use std::path::Path;
 
 #[derive(Deserialize)]
 pub struct Project {
-    pub name: String,
     pub path: String,
     pub instructions: Vec<String>,
 }
@@ -52,7 +51,6 @@ mod tests {
         #[test]
         fn returns_expected_for_project_without_instructions() {
             let project = Project {
-                name: "Example".to_owned(),
                 path: "/tmp/goto/example".to_owned(),
                 instructions: vec![],
             };
@@ -71,7 +69,6 @@ mod tests {
         #[test]
         fn returns_expected_for_project_with_instructions() {
             let project = Project {
-                name: "Example".to_owned(),
                 path: "/tmp/goto/example".to_owned(),
                 instructions: vec!["call_something".to_owned(), "source /tmp/stuff".to_owned()],
             };
@@ -95,7 +92,6 @@ mod tests {
         fn returns_nothing_if_project_has_no_subdirs() {
             let c = DirCreator::new("dir0");
             let project = Project {
-                name: "Example".to_owned(),
                 path: c.path(),
                 instructions: vec![],
             };
@@ -109,7 +105,6 @@ mod tests {
         fn returns_subdir_names() {
             let c = DirCreator::new("dir1").with_subdirs(&["sub0", "sub1", "sub2"]);
             let project = Project {
-                name: "Example".to_owned(),
                 path: c.path(),
                 instructions: vec![],
             };
@@ -126,7 +121,6 @@ mod tests {
         fn not_returns_filenames() {
             let c = DirCreator::new("dir2").with_files(&["file0.txt", "file1.txt", "file2.txt"]);
             let project = Project {
-                name: "Example".to_owned(),
                 path: c.path(),
                 instructions: vec![],
             };
@@ -143,7 +137,6 @@ mod tests {
         #[test]
         fn creates_project_with_extended_path() {
             let project = Project {
-                name: "Example".to_owned(),
                 path: "/tmp/goto/example".to_owned(),
                 instructions: vec!["call_something".to_owned(), "source /tmp/stuff".to_owned()],
             };
@@ -151,7 +144,6 @@ mod tests {
             let got = project.goto_subdir("subdir");
 
             assert_eq!(got.path, "/tmp/goto/example/subdir");
-            assert_eq!(got.name, "Example".to_owned());
             assert_eq!(
                 got.instructions,
                 vec!["call_something".to_owned(), "source /tmp/stuff".to_owned()]
