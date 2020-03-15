@@ -3,6 +3,7 @@ use serde_derive::Deserialize;
 use std::env;
 use std::fs;
 use std::path::Path;
+use subprocess::Exec;
 
 #[derive(Deserialize)]
 pub struct Project {
@@ -38,6 +39,10 @@ impl Project {
             .unwrap()
             .to_owned();
         Self { path, ..self }
+    }
+
+    fn open(&self) {
+        Exec::shell(self.opening_command()).join().unwrap();
     }
 }
 
