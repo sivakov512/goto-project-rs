@@ -26,6 +26,10 @@ impl Manager {
             projects: serde_yaml::from_str(&contents).unwrap(),
         }
     }
+
+    fn list_projects(&self) -> Vec<String> {
+        self.projects.keys().cloned().collect()
+    }
 }
 
 #[cfg(test)]
@@ -88,6 +92,31 @@ mod tests {
             let c = ConfigFile::new("example3.yaml", "awesome: kek");
 
             Manager::from_config_file(&c.fpath);
+        }
+    }
+
+    mod list_projects {
+        use super::*;
+
+        #[test]
+        fn returns_names_for_all_defined_projects() {
+            let c = ConfigFile::new("example4.yaml", CONFIG_CONTENT);
+            let manager = Manager::from_config_file(&c.fpath);
+
+            let got = manager.list_projects();
+
+            assert_eq!(got, vec!["awesome-project", "yet_another_project"]);
+        }
+
+        #[test]
+        fn returns_empty_vector_if_no_projects_defined() {
+            let manager = Manager {
+                projects: BTreeMap::default(),
+            };
+
+            let got = manager.list_projects();
+
+            assert_eq!(got.len(), 0);
         }
     }
 
