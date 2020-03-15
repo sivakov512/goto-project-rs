@@ -1,4 +1,4 @@
-use crate::v2::manager::Manager;
+use crate::manager::Manager;
 use clap::{crate_authors, crate_description, crate_version};
 use clap::{App, Arg};
 use dirs;

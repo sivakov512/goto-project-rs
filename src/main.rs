@@ -1,8 +1,6 @@
 mod cli;
-mod config;
 mod manager;
-mod projects;
-mod v2;
+mod project;
 
 fn main() {
     cli::run_cli();
