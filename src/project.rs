@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+use dirs;
 use serde_derive::Deserialize;
 use std::env;
 use std::fs;
@@ -22,7 +23,12 @@ impl Project {
     }
 
     pub fn list_subdirs(&self) -> Vec<String> {
-        let mut subdirs: Vec<String> = fs::read_dir(&self.path)
+        let mut path = self.path.clone();
+        if self.path.starts_with('~') {
+            path = path.replace('~', dirs::home_dir().unwrap().to_str().unwrap());
+        }
+
+        let mut subdirs: Vec<String> = fs::read_dir(path)
             .unwrap()
             .map(|r| r.unwrap())
             .filter(|e| e.metadata().unwrap().is_dir())
@@ -134,6 +140,16 @@ mod tests {
             let got = project.list_subdirs();
 
             assert_eq!(got.len(), 0);
+        }
+
+        #[test]
+        fn not_panics_for_tilde() {
+            let project = Project {
+                path: "~".to_owned(),
+                instructions: vec![],
+            };
+
+            project.list_subdirs();
         }
     }
 
