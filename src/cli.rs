@@ -1,6 +1,7 @@
 use crate::manager::Manager;
 use clap::{crate_authors, crate_description, crate_version};
 use clap::{App, Arg};
+use dirs;
 
 fn build_cli<'a>(project_list: &[&'a str]) -> App<'a, 'a> {
     App::new("Goto project")
@@ -16,10 +17,13 @@ fn build_cli<'a>(project_list: &[&'a str]) -> App<'a, 'a> {
                 .possible_values(project_list)
                 .help("Open choosen project if passed, otherwise list them all."),
         )
+        .arg(Arg::with_name("subpath").takes_value(true))
+        .arg(Arg::with_name("list-subdirs").long("list-subdirs"))
 }
 
 pub fn run_cli() {
-    let manager = Manager::new(".goto-project.yaml");
+    let fpath = dirs::home_dir().unwrap().join(".goto-project.yaml");
+    let manager = Manager::from_config_file(fpath.to_str().unwrap());
 
     let project_list = manager.list_projects();
     let project_list: Vec<&str> = project_list
@@ -27,10 +31,24 @@ pub fn run_cli() {
         .map(std::convert::AsRef::as_ref)
         .collect();
 
-    let matches = build_cli(project_list.as_slice()).get_matches();
+    let matches = build_cli(&project_list).get_matches();
 
     match matches.value_of("project") {
-        Some(project) => manager.open_project(project),
+        Some(project_name) => {
+            let mut project = manager.get_project(project_name).clone();
+
+            if let Some(subpath) = matches.value_of("subpath") {
+                project = project.goto_subdir(subpath);
+            }
+
+            if matches.is_present("list-subdirs") {
+                for subdir_name in project.list_subdirs() {
+                    println!("{}", subdir_name);
+                }
+            } else {
+                project.open()
+            }
+        }
         None => {
             for project_name in project_list {
                 println!("{}", project_name);
