@@ -5,7 +5,7 @@ use std::fs;
 use std::path::Path;
 use subprocess::Exec;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct Project {
     pub path: String,
     #[serde(default)]
@@ -21,7 +21,7 @@ impl Project {
         command_parts.join(" && ")
     }
 
-    fn list_subdirs(&self) -> Vec<String> {
+    pub fn list_subdirs(&self) -> Vec<String> {
         let mut subdirs: Vec<String> = fs::read_dir(&self.path)
             .unwrap()
             .map(|r| r.unwrap())
@@ -32,7 +32,7 @@ impl Project {
         subdirs
     }
 
-    fn goto_subdir(self, subdir: &str) -> Self {
+    pub fn goto_subdir(self, subdir: &str) -> Self {
         let path = Path::new(&self.path)
             .join(subdir)
             .to_str()
