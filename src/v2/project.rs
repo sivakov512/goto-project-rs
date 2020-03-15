@@ -7,6 +7,7 @@ use std::path::Path;
 #[derive(Deserialize)]
 pub struct Project {
     pub path: String,
+    #[serde(default)]
     pub instructions: Vec<String>,
 }
 
