@@ -2,7 +2,7 @@
 use serde_derive::Deserialize;
 use std::env;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 #[derive(Deserialize)]
 pub struct Project {
@@ -12,13 +12,8 @@ pub struct Project {
 }
 
 impl Project {
-    fn opening_command(&self, subdir: Option<&str>) -> String {
-        let path = match subdir {
-            Some(subdir) => Path::new(&self.path).join(subdir),
-            None => PathBuf::from(&self.path),
-        };
-
-        let mut command_parts: Vec<String> = vec![format!("cd {}", path.to_str().unwrap())];
+    fn opening_command(&self) -> String {
+        let mut command_parts: Vec<String> = vec![format!("cd {}", self.path)];
         command_parts.extend_from_slice(&self.instructions);
         command_parts.extend_from_slice(&[env::var("SHELL").unwrap(), "clear".to_owned()]);
 
@@ -35,11 +30,21 @@ impl Project {
         subdirs.sort();
         subdirs
     }
+
+    fn goto_subdir(self, subdir: &str) -> Self {
+        let path = Path::new(&self.path)
+            .join(subdir)
+            .to_str()
+            .unwrap()
+            .to_owned();
+        Self { path, ..self }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::path::PathBuf;
 
     mod opening_command {
         use super::*;
@@ -48,35 +53,16 @@ mod tests {
         fn returns_expected_for_project_without_instructions() {
             let project = Project {
                 name: "Example".to_owned(),
-                path: "/tmp/goto/example/".to_owned(),
+                path: "/tmp/goto/example".to_owned(),
                 instructions: vec![],
             };
 
-            let got = project.opening_command(None);
+            let got = project.opening_command();
 
             assert_eq!(
                 got,
                 format!(
-                    "cd /tmp/goto/example/ && {} && clear",
-                    env::var("SHELL").unwrap()
-                )
-            )
-        }
-
-        #[test]
-        fn returns_expected_for_project_without_instructions_but_with_subdir() {
-            let project = Project {
-                name: "Example".to_owned(),
-                path: "/tmp/goto/example/".to_owned(),
-                instructions: vec![],
-            };
-
-            let got = project.opening_command(Some("subsub"));
-
-            assert_eq!(
-                got,
-                format!(
-                    "cd /tmp/goto/example/subsub && {} && clear",
+                    "cd /tmp/goto/example && {} && clear",
                     env::var("SHELL").unwrap()
                 )
             )
@@ -86,38 +72,19 @@ mod tests {
         fn returns_expected_for_project_with_instructions() {
             let project = Project {
                 name: "Example".to_owned(),
-                path: "/tmp/goto/example/".to_owned(),
+                path: "/tmp/goto/example".to_owned(),
                 instructions: vec!["call_something".to_owned(), "source /tmp/stuff".to_owned()],
             };
 
-            let got = project.opening_command(None);
+            let got = project.opening_command();
 
             assert_eq!(
                 got,
                 format!(
-                    "cd /tmp/goto/example/ && call_something && source /tmp/stuff && {} && clear",
+                    "cd /tmp/goto/example && call_something && source /tmp/stuff && {} && clear",
                     env::var("SHELL").unwrap()
                 )
             )
-        }
-
-        #[test]
-        fn returns_expected_for_project_with_instructions_and_subdir() {
-            let project = Project {
-                name: "Example".to_owned(),
-                path: "/tmp/goto/example/".to_owned(),
-                instructions: vec!["call_something".to_owned(), "source /tmp/stuff".to_owned()],
-            };
-
-            let got = project.opening_command(Some("subsub"));
-
-            assert_eq!(
-                got,
-                format!(
-                    "cd /tmp/goto/example/subsub && call_something && source /tmp/stuff && {} && clear",
-                    env::var("SHELL").unwrap()
-                    )
-                )
         }
     }
 
@@ -140,8 +107,7 @@ mod tests {
 
         #[test]
         fn returns_subdir_names() {
-            let c = DirCreator::new("dir1");
-            c.create_subdirs(&["sub0", "sub1", "sub2"]);
+            let c = DirCreator::new("dir1").with_subdirs(&["sub0", "sub1", "sub2"]);
             let project = Project {
                 name: "Example".to_owned(),
                 path: c.path(),
@@ -158,8 +124,7 @@ mod tests {
 
         #[test]
         fn not_returns_filenames() {
-            let c = DirCreator::new("dir2");
-            c.create_files(&["file0.txt", "file1.txt", "file2.txt"]);
+            let c = DirCreator::new("dir2").with_files(&["file0.txt", "file1.txt", "file2.txt"]);
             let project = Project {
                 name: "Example".to_owned(),
                 path: c.path(),
@@ -169,6 +134,28 @@ mod tests {
             let got = project.list_subdirs();
 
             assert_eq!(got.len(), 0);
+        }
+    }
+
+    mod goto_subdir {
+        use super::*;
+
+        #[test]
+        fn creates_project_with_extended_path() {
+            let project = Project {
+                name: "Example".to_owned(),
+                path: "/tmp/goto/example".to_owned(),
+                instructions: vec!["call_something".to_owned(), "source /tmp/stuff".to_owned()],
+            };
+
+            let got = project.goto_subdir("subdir");
+
+            assert_eq!(got.path, "/tmp/goto/example/subdir");
+            assert_eq!(got.name, "Example".to_owned());
+            assert_eq!(
+                got.instructions,
+                vec!["call_something".to_owned(), "source /tmp/stuff".to_owned()]
+            );
         }
     }
 
@@ -184,22 +171,24 @@ mod tests {
             creator
         }
 
-        fn path(&self) -> String {
-            self.path.to_str().unwrap().to_owned()
-        }
-
-        fn create_subdirs(&self, subdirs: &[&str]) {
+        fn with_subdirs(self, subdirs: &[&str]) -> Self {
             for subdir in subdirs.iter() {
                 let path = self.path.join(subdir);
                 fs::create_dir(&path).unwrap();
             }
+            self
         }
 
-        fn create_files(&self, fnames: &[&str]) {
+        fn with_files(self, fnames: &[&str]) -> Self {
             for fname in fnames.iter() {
                 let path = self.path.join(fname);
                 fs::File::create(path).unwrap();
             }
+            self
+        }
+
+        fn path(&self) -> String {
+            self.path.to_str().unwrap().to_owned()
         }
     }
 
