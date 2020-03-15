@@ -41,7 +41,7 @@ impl Project {
         Self { path, ..self }
     }
 
-    fn open(&self) {
+    pub fn open(&self) {
         Exec::shell(self.opening_command()).join().unwrap();
     }
 }

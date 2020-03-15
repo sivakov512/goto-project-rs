@@ -1,2 +1,2 @@
-mod manager;
+pub mod manager;
 mod project;

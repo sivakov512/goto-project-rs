@@ -11,7 +11,7 @@ pub struct Manager {
 }
 
 impl Manager {
-    fn from_config_file(config_path: &str) -> Self {
+    pub fn from_config_file(config_path: &str) -> Self {
         let fpath = PathBuf::from(config_path);
         if !&fpath.exists() {
             panic!("Config file at \"{}\" not found.", fpath.display())
@@ -27,8 +27,12 @@ impl Manager {
         }
     }
 
-    fn list_projects(&self) -> Vec<String> {
+    pub fn list_projects(&self) -> Vec<String> {
         self.projects.keys().cloned().collect()
+    }
+
+    pub fn get_project(&self, name: &str) -> &Project {
+        &self.projects[name]
     }
 }
 
@@ -117,6 +121,31 @@ mod tests {
             let got = manager.list_projects();
 
             assert_eq!(got.len(), 0);
+        }
+    }
+
+    mod get_project {
+        use super::*;
+
+        #[test]
+        fn returns_project() {
+            let c = ConfigFile::new("example5.yaml", CONFIG_CONTENT);
+            let manager = Manager::from_config_file(&c.fpath);
+
+            let got = manager.get_project("awesome-project");
+
+            assert_eq!(got.path, "~/Devel/Projects/awesome-project/");
+            assert_eq!(got.instructions.len(), 0);
+        }
+
+        #[test]
+        #[should_panic]
+        fn panics_if_project_not_found() {
+            let manager = Manager {
+                projects: BTreeMap::default(),
+            };
+
+            manager.get_project("awesome-project");
         }
     }
 
