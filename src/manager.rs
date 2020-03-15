@@ -41,13 +41,14 @@ mod tests {
     use std::env;
     use std::fs;
     use std::io::Write;
+    use uuid::Uuid;
 
     mod from_config_file {
         use super::*;
 
         #[test]
         fn project_without_instructions_parsed_correctly() {
-            let c = ConfigFile::new("example0.yaml", CONFIG_CONTENT);
+            let c = TmpFile::new(CONFIG_CONTENT);
             let manager = Manager::from_config_file(&c.fpath);
 
             let project = &manager.projects["awesome-project"];
@@ -58,7 +59,7 @@ mod tests {
 
         #[test]
         fn project_with_instruction_parsed_correctly() {
-            let c = ConfigFile::new("example1.yaml", CONFIG_CONTENT);
+            let c = TmpFile::new(CONFIG_CONTENT);
             let manager = Manager::from_config_file(&c.fpath);
 
             let project = &manager.projects["yet_another_project"];
@@ -67,16 +68,16 @@ mod tests {
             assert_eq!(
                 project.instructions,
                 vec![
-                    "source ~/Devel/Envs/yet_another_project/bin/activate".to_owned(),
-                    "export FLASK_APP=app.py".to_owned(),
-                    "export FLASK_DEBUG=1".to_owned(),
+                    "source ~/Devel/Envs/yet_another_project/bin/activate",
+                    "export FLASK_APP=app.py",
+                    "export FLASK_DEBUG=1",
                 ]
             )
         }
 
         #[test]
         fn parses_all_defined_projects() {
-            let c = ConfigFile::new("example2.yaml", CONFIG_CONTENT);
+            let c = TmpFile::new(CONFIG_CONTENT);
 
             let manager = Manager::from_config_file(&c.fpath);
 
@@ -92,7 +93,7 @@ mod tests {
         #[test]
         #[should_panic]
         fn will_panic_for_wrong_config() {
-            let c = ConfigFile::new("example3.yaml", "awesome: kek");
+            let c = TmpFile::new("awesome: kek");
 
             Manager::from_config_file(&c.fpath);
         }
@@ -103,7 +104,7 @@ mod tests {
 
         #[test]
         fn returns_names_for_all_defined_projects() {
-            let c = ConfigFile::new("example4.yaml", CONFIG_CONTENT);
+            let c = TmpFile::new(CONFIG_CONTENT);
             let manager = Manager::from_config_file(&c.fpath);
 
             let got = manager.list_projects();
@@ -128,7 +129,7 @@ mod tests {
 
         #[test]
         fn returns_project() {
-            let c = ConfigFile::new("example5.yaml", CONFIG_CONTENT);
+            let c = TmpFile::new(CONFIG_CONTENT);
             let manager = Manager::from_config_file(&c.fpath);
 
             let got = manager.get_project("awesome-project");
@@ -160,16 +161,16 @@ yet_another_project:
     - export FLASK_DEBUG=1
 ";
 
-    struct ConfigFile {
+    struct TmpFile {
         fpath: String,
     }
 
-    impl ConfigFile {
-        fn new(fname: &str, contents: &str) -> Self {
+    impl TmpFile {
+        fn new(contents: &str) -> Self {
             let path = env::temp_dir();
             fs::create_dir_all(&path).unwrap();
 
-            let fpath = path.join(fname);
+            let fpath = path.join(Uuid::new_v4().to_string());
             let mut file = File::create(&fpath).unwrap();
             file.write_all(contents.as_bytes()).unwrap();
 
@@ -179,7 +180,7 @@ yet_another_project:
         }
     }
 
-    impl Drop for ConfigFile {
+    impl Drop for TmpFile {
         fn drop(&mut self) {
             fs::remove_file(&self.fpath).unwrap();
         }

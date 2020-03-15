@@ -56,6 +56,7 @@ impl Project {
 mod tests {
     use super::*;
     use std::path::PathBuf;
+    use uuid::Uuid;
 
     mod opening_command {
         use super::*;
@@ -102,7 +103,7 @@ mod tests {
 
         #[test]
         fn returns_nothing_if_project_has_no_subdirs() {
-            let c = DirCreator::new("dir0");
+            let c = TmpDir::new();
             let project = Project {
                 path: c.path(),
                 instructions: vec![],
@@ -115,7 +116,7 @@ mod tests {
 
         #[test]
         fn returns_subdir_names() {
-            let c = DirCreator::new("dir1").with_subdirs(&["sub0", "sub1", "sub2"]);
+            let c = TmpDir::new().with_subdirs(&["sub0", "sub1", "sub2"]);
             let project = Project {
                 path: c.path(),
                 instructions: vec![],
@@ -123,15 +124,12 @@ mod tests {
 
             let got = project.list_subdirs();
 
-            assert_eq!(
-                got,
-                vec!["sub0".to_owned(), "sub1".to_owned(), "sub2".to_owned()]
-            );
+            assert_eq!(got, vec!["sub0", "sub1", "sub2"]);
         }
 
         #[test]
         fn not_returns_filenames() {
-            let c = DirCreator::new("dir2").with_files(&["file0.txt", "file1.txt", "file2.txt"]);
+            let c = TmpDir::new().with_files(&["file0.txt", "file1.txt", "file2.txt"]);
             let project = Project {
                 path: c.path(),
                 instructions: vec![],
@@ -168,20 +166,22 @@ mod tests {
             assert_eq!(got.path, "/tmp/goto/example/subdir");
             assert_eq!(
                 got.instructions,
-                vec!["call_something".to_owned(), "source /tmp/stuff".to_owned()]
+                vec!["call_something", "source /tmp/stuff"]
             );
         }
     }
 
-    struct DirCreator {
+    struct TmpDir {
         path: PathBuf,
     }
 
-    impl DirCreator {
-        fn new(path: &str) -> Self {
-            let path = env::temp_dir().join("goto_project").join(path);
+    impl TmpDir {
+        fn new() -> Self {
+            let path = env::temp_dir()
+                .join("goto_project")
+                .join(Uuid::new_v4().to_string());
             fs::create_dir_all(&path).unwrap();
-            let creator = DirCreator { path };
+            let creator = TmpDir { path };
             creator
         }
 
@@ -206,7 +206,7 @@ mod tests {
         }
     }
 
-    impl Drop for DirCreator {
+    impl Drop for TmpDir {
         fn drop(&mut self) {
             fs::remove_dir_all(&self.path).unwrap();
         }
