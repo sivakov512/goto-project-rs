@@ -13,9 +13,6 @@ license = "MIT"
 
 autobins = false
 
-[badges]
-travis-ci = { repository = "sivakov512/goto-project-rs", branch = "master" }
-
 [[bin]]
 name = "gt"
 path = "src/main.rs"
