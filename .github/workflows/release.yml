@@ -16,7 +16,7 @@ jobs:
     env:
       SHELL: /bin/bash
 
-    runs-on: ${{matrix.os}}
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2
@@ -36,7 +36,7 @@ jobs:
     - name: Upload release artifact
       uses: actions/upload-artifact@v1
       with:
-        name: gt-${{matrix.os}}-${{github.sha}}-release
+        name: gt-${{ matrix.os }}-${{ github.sha }}-release
         path: target/release/gt
 
   github-release:
@@ -58,14 +58,14 @@ jobs:
     - name: Download linux artifact
       uses: actions/download-artifact@v1
       with:
-        name: gt-ubuntu-latest-${{github.sha}}-release
-        path: gt-linux-${{github.ref}}-release
+        name: gt-ubuntu-latest-${{ github.sha }}-release
+        path: gt-linux-${{ github.ref }}-release
 
     - name: Download macos artifact
       uses: actions/download-artifact@v1
       with:
-        name: gt-macos-latest-${{github.sha}}-release
-        path: gt-macos-${{github.ref}}-release
+        name: gt-macos-latest-${{ github.sha }}-release
+        path: gt-macos-${{ github.ref }}-release
 
     - name: Upload linux asset
       uses: actions/upload-release-asset@v1
@@ -73,8 +73,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: gt-linux-${{github.ref}}-release/gt
-        asset_name: gt-linux-${{github.ref}}-release
+        asset_path: gt-linux-${{ github.ref }}-release/gt
+        asset_name: gt-linux-${{ github.ref }}-release
         asset_content_type: application/octet-stream
 
     - name: Upload macos asset
@@ -83,8 +83,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: gt-macos-${{github.ref}}-release/gt
-        asset_name: gt-macos-${{github.ref}}-release
+        asset_path: gt-macos-${{ github.ref }}-release/gt
+        asset_name: gt-macos-${{ github.ref }}-release
         asset_content_type: application/octet-stream
 
   crates-io-release:

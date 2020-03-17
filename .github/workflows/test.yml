@@ -13,7 +13,7 @@ jobs:
     env:
       SHELL: /bin/bash
 
-    runs-on: ${{matrix.os}}
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2
@@ -33,5 +33,5 @@ jobs:
     - name: Upload debug artifact
       uses: actions/upload-artifact@v1
       with:
-        name: gt-${{matrix.os}}-${{github.sha}}-debug
+        name: gt-${{ matrix.os }}-${{ github.sha }}-debug
         path: target/debug/gt
