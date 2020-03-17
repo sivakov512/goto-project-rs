@@ -124,7 +124,7 @@ dependencies = [
 
 [[package]]
 name = "goto_project"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "dirs 2.0.2 (registry+https://github.com/rust-lang/crates.io-index)",

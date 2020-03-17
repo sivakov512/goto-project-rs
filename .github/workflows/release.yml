@@ -39,7 +39,7 @@ jobs:
         name: gt-${{matrix.os}}-${{github.sha}}-release
         path: target/release/gt
 
-  release:
+  github-release:
     needs: build
     runs-on: ubuntu-latest
 
@@ -86,3 +86,15 @@ jobs:
         asset_path: gt-macos-${{github.ref}}-release/gt
         asset_name: gt-macos-${{github.ref}}-release
         asset_content_type: application/octet-stream
+
+  crates-io-release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Release on crates.io
+      run: cargo publish --token ${CRATES_IO_TOKEN}
+      env:
+        CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}

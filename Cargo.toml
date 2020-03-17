@@ -1,6 +1,6 @@
 [package]
 name = "goto_project"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Nikita Sivakov <sivakov512@gmail.com>"]
 edition = "2018"
 
