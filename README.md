@@ -9,53 +9,50 @@ This is a like `workon` for python, but more powerfull and not only for python.
 
 
 Configuration and usage
------
-Specify your project in `~/.goto-project.yaml` file.
+---
+Specify your projects in `~/.goto-project.yaml` file.
 
 ``` yaml
-goto-project:  # this is a project name
-  path: ~/Devel/Projects/goto-project/  # path project
-  instructions:  # any instructions to call when you switch project
+goto-project:  # project name
+  path: ~/Devel/Projects/goto-project/  # where to cd to open project
+  instructions:  # any instructions to run on project opening
     - source ~/Devel/Envs/py3_goto-project/bin/activate
-  command: vim  # command to run when project opened
-  clear_on_exit: false  # if specified as false then terminal output will not be cleared on project close
+    - export PATH="$HOME/Devel/Projects/goto-project/src/target/debug:$PATH"
 ```
 
-To list all available projects call
+* List all available projects
 
 ``` shell
 gt
 ```
 
-To open project call `gt` with project name as argument
+* Open project `goto-project`
 
 ``` shell
 gt goto-project
 ```
 
-To close project press `C-D`. When you close project all changes will be breaked. For example, `$PATH` will be restored if you extend it.
+* List subdirs of `goto-projects`
 
-Usage example
--------
-For example you have a project named `awesome-nuxt-blog` placed at `~/Projects/awesome-nuxt-blog`.
-You need to extend your `$PATH` with `.mode_modules/.bin`, source `.env/bin/activate` and show git status when project opened.
-
-Create `~/.goto-project.yaml` with this content:
-``` yaml
-awesome-nuxt-blog:
-  path: ~/Projects/awesome-nuxt-blog
-  instructions:
-    - source .env/bin/activate
-    - export PATH=".node_modules/.bin:$PATH"
-    - git status
+``` shell
+gt goto-project --list-subdirs
 ```
 
-Now you at `~/`. Type `gt awesome-nuxt-blog`. Now you at `~/Projects/awesome-nuxt-blog`.
+* List subdirs of project's subdir
 
-All your instructions are executed. Also you see `git status` output in your shell.
+``` shell
+gt goto-project src --list-subdirs
+```
 
-Type `C-D` and now you in `~/`.
+* Open project within subdir
+
+``` shell
+gt goto-project src
+```
+
+To close project press `C-D`, this will roll back all environment changes. In the example above, virtual environment will be "deactivated" and `PATH` will be restored.
+
 
 Screencast
-----------
-...available [here](https://asciinema.org/a/149712)
+---
+[![asciicast](https://asciinema.org/a/eWzv0cl5P2FhafqkjNETQ5ZoT.svg)](https://asciinema.org/a/eWzv0cl5P2FhafqkjNETQ5ZoT)
